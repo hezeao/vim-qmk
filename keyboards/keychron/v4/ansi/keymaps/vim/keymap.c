@@ -49,7 +49,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         XXXXXXX, XXXXXXX,  XXXXXXX, C(KC_RGHT), KC_F2,   XXXXXXX, C(KC_C), C(KC_Z), KC_I,    XXXXXXX, C(KC_V),  XXXXXXX,  XXXXXXX,  XXXXXXX,
         KC_ESC,  XXXXXXX,  XXXXXXX, KC_DEL,  C(KC_F), KC_HOME, KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT, XXXXXXX,  XXXXXXX,            KC_ENT,
         XXXXXXX,           XXXXXXX, C(KC_X), XXXXXXX, KC_V,    C(KC_LEFT), XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,  XXXXXXX,            XXXXXXX,
-        XXXXXXX, KC_LWIN,  XXXXXXX,                            XXXXXXX,                            XXXXXXX,  XXXXXXX,  QK_BOOT,  XXXXXXX),
+        XXXXXXX, KC_LWIN,  XXXXXXX,                            KC_SPC,                             XXXXXXX,  UG_TOGG,  QK_BOOT,  XXXXXXX),
 
     [_V1] = LAYOUT_60_ansi(
         XXXXXXX, XXXXXXX,  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,
@@ -78,13 +78,13 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     for (uint8_t i = led_min; i < led_max; i++) {
         switch(get_highest_layer(layer_state|default_layer_state)) {
             case 1:
-                rgb_matrix_set_color(i, 102, 217, 239);
+                rgb_matrix_set_color(i, 204, 0, 255);
                 break;
             case 2:
-                rgb_matrix_set_color(i, 166, 226, 46);
+                rgb_matrix_set_color(i, 0, 204, 187);
                 break;
             case 3:
-                rgb_matrix_set_color(i, 253, 151, 31);
+                rgb_matrix_set_color(i, 238, 119, 34);
                 break;
             default:
                 break;
@@ -104,7 +104,7 @@ const key_override_t normal_override = {.trigger_mods      = MOD_BIT(KC_LGUI),  
                                         .replacement       = KC_NO,                                            //
                                         .enabled           = NULL};
 
-const key_override_t insert_override = {.layers            = (1 << 2) | (1 << 3),                                        //
+const key_override_t insert_override = {.layers            = (1 << 2) | (1 << 3),                              //
                                         .options           = ko_option_no_reregister_trigger,                  //
                                         .custom_action     = set_mode,                                         //
                                         .context           = (void *)1,                                        //
@@ -112,7 +112,7 @@ const key_override_t insert_override = {.layers            = (1 << 2) | (1 << 3)
                                         .replacement       = KC_NO,                                            //
                                         .enabled           = NULL};
 
-const key_override_t visual_override = {.layers            = (1 << 2),                                        //
+const key_override_t visual_override = {.layers            = (1 << 2),                                         //
                                         .options           = ko_option_no_reregister_trigger,                  //
                                         .custom_action     = set_mode,                                         //
                                         .context           = (void *)3,                                        //
@@ -126,11 +126,14 @@ const key_override_t delete_key_override = ko_make_basic(MOD_MASK_SHIFT, KC_BSPC
 
 const key_override_t caps_lock_override = ko_make_basic(MOD_MASK_SHIFT, KC_ESC, KC_CAPS);
 
+const key_override_t ctrl_h_override = ko_make_with_layers(MOD_MASK_CTRL, KC_H, KC_BSPC, (1 << 1));
+
 // This globally defines all key overrides to be used
 const key_override_t *key_overrides[] = {
     &normal_override,
     &insert_override,
     &visual_override,
     &delete_key_override,
-    &caps_lock_override
+    &caps_lock_override,
+    &ctrl_h_override
 };
