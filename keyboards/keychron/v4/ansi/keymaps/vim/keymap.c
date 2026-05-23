@@ -45,14 +45,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         XXXXXXX, KC_LCTL,  KC_LALT,                            KC_SPC,                             KC_LWIN,  KC_RALT,  KC_RCTL,  XXXXXXX),
 
     [NORMAL] = LAYOUT_60_ansi(
-        XXXXXXX, XXXXXXX,  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,
+        KC_GRV,  KC_1,     KC_2,    KC_3,    KC_4,    KC_5,    KC_6,    KC_7,    KC_8,    KC_9,    KC_0,     KC_MINS,  KC_EQL,   KC_BSPC,
         KC_TAB,  XXXXXXX,  XXXXXXX, C(KC_RGHT), KC_F2,   XXXXXXX, C(KC_C), C(KC_Z), KC_I,    XXXXXXX, C(KC_V),  XXXXXXX,  XXXXXXX,  XXXXXXX,
         KC_ESC,  XXXXXXX,  XXXXXXX, KC_DEL,  C(KC_F), KC_HOME, KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT, XXXXXXX,  XXXXXXX,            KC_ENT,
         KC_LSFT,           XXXXXXX, C(KC_X), XXXXXXX, KC_V,    C(KC_LEFT), XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,  XXXXXXX,            KC_RSFT,
         XXXXXXX, KC_LCTL,  KC_LALT,                            KC_SPC,                             KC_LWIN,  KC_RALT,  KC_RCTL,  XXXXXXX),
 
     [VISUAL] = LAYOUT_60_ansi(
-        XXXXXXX, XXXXXXX,  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,
+        KC_GRV,  KC_1,     KC_2,    KC_3,    KC_4,    KC_5,    KC_6,    KC_7,    KC_8,    KC_9,    KC_0,     KC_MINS,  KC_EQL,   KC_BSPC,
         XXXXXXX, XXXXXXX,  XXXXXXX, S(C(KC_RGHT)), KC_F2,   XXXXXXX, C(KC_C), C(KC_Z), KC_I,    XXXXXXX, C(KC_V),  XXXXXXX,  XXXXXXX,  XXXXXXX,
         KC_ESC,  XXXXXXX,  XXXXXXX, KC_DEL,  C(KC_F), KC_HOME, S(KC_LEFT), S(KC_DOWN), S(KC_UP),   S(KC_RGHT), XXXXXXX,  XXXXXXX,            KC_ENT,
         XXXXXXX,           XXXXXXX, C(KC_X), XXXXXXX, XXXXXXX, S(C(KC_LEFT)), XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,  XXXXXXX,            XXXXXXX,
@@ -66,6 +66,47 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         XXXXXXX, XXXXXXX,  XXXXXXX,                            XXXXXXX,                            XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX)
 };
 
+static bool alt_held;
+static bool fkey_used;
+static uint16_t fkey;
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    switch (get_highest_layer(layer_state | default_layer_state)) {
+        case NORMAL:
+            switch (keycode) {
+                case KC_LALT:
+                case KC_RALT:
+                    if (record->event.pressed) {
+                        alt_held  = true;
+                        fkey_used = false;
+                    } else {
+                        alt_held = false;
+                        if (!fkey_used) tap_code(keycode);
+                    }
+                    return false;
+
+                case KC_1 ... KC_0:
+                case KC_MINS:
+                case KC_EQL:
+                    if (alt_held && record->event.pressed) {
+                        fkey = keycode <= KC_0 ? keycode + (KC_F1 - KC_1)
+                             : keycode == KC_MINS ? KC_F11
+                             :                      KC_F12;
+                        register_code(fkey);
+                        fkey_used = true;
+                        return false;
+                    }
+                    if (!record->event.pressed && fkey_used) {
+                        unregister_code(fkey);
+                        return false;
+                    }
+                    break;
+            }
+            break;
+    }
+
+    return true;
+}
 
 bool set_mode(bool key_down, void *layer) {
     if (key_down) {
